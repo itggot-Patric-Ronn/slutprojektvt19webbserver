@@ -1,6 +1,6 @@
-h1 welcome #{users[0]["Username"]}
+h1 welcome #{session[:username]}
 p 
-    a   href="/profile/#{params["id"]}/edit" edit
+    a   href="/profile/#{session["Id"]}/edit" edit
 
 p 
     a   href="/post/all" post
