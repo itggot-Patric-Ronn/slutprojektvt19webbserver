@@ -1,35 +1,42 @@
 def login(username, password)  
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    result = db.execute("SELECT Password, Mail, Username From users Where Username = (?)", params["username"])
-    if BCrypt::Password.new(result[0]["Password"]) == password
-        session[:username] = result[0]["Username"]
-        email = result[0]["Mail"]
+    result = db.execute("SELECT Password From users Where Username = (?)", username)
+    if BCrypt::Password.new(result[0][0]).==(password)
+        session[:username] = username
         session[:cookies] = request.cookies
-        session[:Id] = result[0]["Id"]
         session[:loggedin] = true
+        return true 
     else 
         session[:loggedin] = false
+        return false
     end 
 end 
 
 def all_post()
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    result = db.execute("select users.Username, post.Title, post.Postid, post.Number, post.Text from post INNER JOIN users on users.Id = post.Postid")
+    result = db.execute("select users.Username, post.Title, post.Postid, post.Number from post INNER JOIN users on users.Id = post.Postid")
     return result
+end 
+
+def text(number)
+    db = SQLite3::Database.new("db/dbsave.db")
+    db.results_as_hash = true
+    result = db.execute("select users.Username, post.Title, post.Postid, post.Number, post.text from post WHERE post.number = ?", number)
 end 
 
 def get_user_id(username)
     db = SQLite3::Database.new("db/dbsave.db")
-    user_id = db.execute("SELECT users.user_id FROM users WHERE users.username = ?", username) 
-    return user_id
+    result = db.execute("SELECT Id FROM users WHERE Username = ?", username)
+    return result[0][0]
 end
 
 def create_user(username,password,email)
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    db.execute("INSERT INTO users (Username, Password, Mail) VALUES (?,?,?)",username,BCrypt::Password.create(password),email)
+    p password
+    db.execute("INSERT INTO users (Username, Password, Mail) VALUES (?,?,?)", username, BCrypt::Password.create(password), email)
 end
 
 def profile()
@@ -42,7 +49,7 @@ end
 def uptate_profile(username,mail)
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    db.execute("UPDATE users SET Username = ?, Mail = ? WHERE Id = ?",params["Username"],params["Mail"], session[:Id])
+    db.execute("UPDATE users SET Username = ?, Mail = ? WHERE Id = ?", username, mail, session[:Id])
 end 
 
 def uptate_post(title,content,number)
@@ -58,10 +65,10 @@ def edit_post(number)
     return result
 end 
 
-def new_post(title,content)
+def new_post(title,text)
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    db.execute("INSERT INTO posts (Title, Text, Id, Upvote) VALUES (?,?,?,?,?)", title, text, session[:Id], 0)
+    db.execute("INSERT INTO post (Title, Text, Postid, Upvote) VALUES (?,?,?,?)", title, text, session[:Id], 0)
 end
 
 def delete_post(number)
@@ -69,9 +76,9 @@ def delete_post(number)
     db.execute("DELETE FROM post WHERE Number = ?", number)
 end
 
-def delete_user(Id)
+def delete_user(id)
     db = SQLite3::Database.new("db/dbsave.db")
-    db.execute("DELETE FROM user WHERE Id = ?", Id)
+    db.execute("DELETE FROM user WHERE Id = ?", id)
 end 
 
 def postsid()
