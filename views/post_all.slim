@@ -2,9 +2,14 @@ a href="/"
     h1 start
 - posts.each do |posts|    
     article
-        p 
+        p   
             a href="/post/#{posts["Number"]}"
                 h2 #{posts["Title"]}
                             
         p   href="/post/#{posts["Postid"]}"  
-                h3 av #{posts["Username"]}
+                h3 av #{posts["Username"]}  
+        a   href="/vote/upvote"    
+                h2 upvote  
+        h2 #{posts["Upvote"]}
+        a   href="/vote/downvote" 
+                h2 downvote

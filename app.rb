@@ -51,7 +51,7 @@ get('/post/all') do
     slim(:post_all, locals:{posts: result})
 end  
 
-get('post/:Number')
+get('post/:number') do
     result = text(post[":number"])
     slim(:text, locals:{posts: result})
 end
@@ -106,8 +106,12 @@ get('/profile/new') do
 end
 
 post('/create') do
-    create_user(params["username"], params["password"], params["email"])
-    redirect('/profile/login')
+    if params["password"] == params["password1"]
+        create_user(params["username"], params["password"], params["email"])
+        redirect('/profile/login')
+    else
+        redirect('/profile/new')
+    end
 end
 
 post('/post/new') do
@@ -132,3 +136,27 @@ get('/profile/:id') do
         redirect('/not_loggin')
     end 
 end 
+
+get('/upvote_post/:id') do
+    vote_value = prevoius_post_vote(params["id"], session[:user_id])
+    if vote_value == 1
+        vote_post(params["id"], session[:user_id], 0, -1)
+    elsif vote_value == -1
+        vote_post(params["id"], session[:user_id], 1, 2)
+    elsif session[:logged_in] == true
+        vote_post(params["id"], session[:user_id], 1, 1)
+    end
+    redirect back
+end
+
+get('/downvote_post/:id') do
+    vote_value = prevoius_post_vote(params["id"], session[:user_id])
+    if  vote_value == -1
+        vote_post(params["id"], session[:user_id], 0, 1)
+    elsif vote_value == 1
+        vote_post(params["id"], session[:user_id], -1, -2)
+    elsif session[:logged_in] == true
+        vote_post(params["id"], session[:user_id], -1, -1)
+    end
+    redirect back
+end
