@@ -58,7 +58,7 @@ end
 
 post('/post/:number/edit') do
     uptate_post(params["title"],params["text"],params["number"])
-    redirect("/post/#{session[:Postid]}")
+    redirect("/post/#{params["number"]}")
 end 
 
 get('/post/:number/edit') do
@@ -68,11 +68,9 @@ end
 
 get('/post/:postid') do
     if session[:loggedin] == true 
-        db = SQLite3::Database.new("db/dbsave.db")
-        db.results_as_hash = true
-        session[:Postid] = params["postid"]
-        postid = params["postid"]
-        result = db.execute("select users.Username, post.Postid, post.Number, post.Text from users INNER JOIN post on users.Id = post.Postid WHERE users.Id = ?", postid)    
+        result = one_post(params["postid"])
+        p result
+        p one_post(params["postid"])
         slim(:post_one, locals:{posts: result})
     else 
         redirect('/')
@@ -92,7 +90,7 @@ post('/profile/login') do
         session[:Id] = get_user_id(params["username"])
         redirect("/profile/#{session[:Id]}")
     else
-        session[:logged_in] = false
+        session[:loggedin] = false
         redirect('/no_access')
     end    
 end
@@ -137,26 +135,27 @@ get('/profile/:id') do
     end 
 end 
 
-get('/upvote_post/:id') do
-    vote_value = prevoius_post_vote(params["id"], session[:user_id])
-    if vote_value == 1
-        vote_post(params["id"], session[:user_id], 0, -1)
-    elsif vote_value == -1
-        vote_post(params["id"], session[:user_id], 1, 2)
-    elsif session[:logged_in] == true
-        vote_post(params["id"], session[:user_id], 1, 1)
+get('/uvote/:id') do
+    vote_value = vote(params["id"], session[:Id])
+    if vote_value == -1
+        vote_change1(params["id"], session[:Id], 1, 2)
+    elsif session[:loggedin] == true
+        vote_change1(params["id"], session[:Id], 1, 1)
     end
-    redirect back
+    redirect('/post/all')
 end
 
-get('/downvote_post/:id') do
-    vote_value = prevoius_post_vote(params["id"], session[:user_id])
-    if  vote_value == -1
-        vote_post(params["id"], session[:user_id], 0, 1)
-    elsif vote_value == 1
-        vote_post(params["id"], session[:user_id], -1, -2)
-    elsif session[:logged_in] == true
-        vote_post(params["id"], session[:user_id], -1, -1)
+get('/dvote/:id') do
+    vote_value = vote(params["id"], session[:Id])
+    if vote_value == 1
+        vote_change1(params["id"], session[:Id], -1, -2)
+    elsif session[:loggedin] == true
+        vote_change1(params["id"], session[:Id], -1, -1)
     end
-    redirect back
+    redirect('/post/all')
+end
+
+get('/logout') do
+    session.clear
+    redirect('/')
 end

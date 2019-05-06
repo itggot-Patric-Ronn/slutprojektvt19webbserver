@@ -4,12 +4,11 @@ a href="/"
     article
         p   
             a href="/post/#{posts["Number"]}"
-                h2 #{posts["Title"]}
-                            
+                h2 #{posts["Title"]}                   
         p   href="/post/#{posts["Postid"]}"  
                 h3 av #{posts["Username"]}  
-        a   href="/vote/upvote"    
+        a   href="/uvote/#{posts["Number"]}"    
                 h2 upvote  
         h2 #{posts["Upvote"]}
-        a   href="/vote/downvote" 
+        a   href="/dvote/#{posts["Number"]}" 
                 h2 downvote

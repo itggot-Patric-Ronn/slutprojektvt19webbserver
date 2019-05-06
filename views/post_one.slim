@@ -1,6 +1,9 @@
-- posts.each do |posts|    
-    article
-        p 
-            h2 User #{posts["Username"]}    
-        p #{posts["Text"]}
-        a href="/post/#{posts["Number"]}/edit" edit
+p
+    a href="/" 
+        h1 start   
+article
+    h1 #{posts[0]["Title"]}
+    p
+        h2 User #{posts[0]["Username"]}    
+    p   #{posts[0]["Text"]}
+    a href="/post/#{posts[0]["Number"]}/edit" edit

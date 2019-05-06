@@ -51,17 +51,16 @@ def uptate_profile(username,mail)
     db.execute("UPDATE users SET Username = ?, Mail = ? WHERE Id = ?", username, mail, session[:Id])
 end 
 
-def uptate_post(title,content,number)
+def uptate_post(title,text,number)
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    db.execute("UPDATE post SET (Title,Text) VALUES (?,?) WHERE Number = ?",title, text, number)
+    db.execute("UPDATE post SET Title = ?, Text = ? WHERE Number = ?", "#{title}", "#{text}", number)
 end 
 
 def edit_post(number)
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    result = db.execute("SELECT Text, Number From post Where Number = (?)", number)
-    return result
+    db.execute("SELECT Text, Number, Title From post Where Number = (?)", number)
 end 
 
 def new_post(title,text)
@@ -85,24 +84,30 @@ def postsid()
     db.results_as_hash = true
 end 
 
-def vote_change(number, id, value, vote)
+def vote_change1(number, id, votes, upvotes)
     db = SQLite3::Database.new("db/dbsave.db")
     if vote(number, id) == true
-        db.execute("UPDATE vote SET value = ? WHERE post_id = ? AND user_id = ?", value, post_id, user_id)
+        db.execute("UPDATE vote SET Votes = ? WHERE Number = ? AND Id = ?", votes, number, id)
     else
-        db.execute("INSERT INTO Vote (Number, Id, value) VALUES (?,?,?)", post_id, id, value)       
+        db.execute("INSERT INTO vote (Number, Id, Votes) VALUES (?,?,?)", number, id, votes)
     end
-    upvote_count = db.execute("SELECT posts.upvote_count FROM posts WHERE posts.post_id = ?", post_id)[0][0].to_i
-    db.execute("UPDATE posts SET upvote_count = ? WHERE post_id = ?", upvote_count + count_change, post_id)
+    upvote = db.execute("SELECT post.upvote FROM post WHERE post.Number = ?", number)[0][0].to_i
+    db.execute("UPDATE post SET upvote = ? WHERE Number = ?", upvote + upvotes, number)
 end
 
 def vote(number, id)
     db = SQLite3::Database.new("db/dbsave.db")
     db.results_as_hash = true
-    result = db.execute("SELECT vote.Number, vote.Id, vote.votes FROM vote WHERE Id = ? AND Number = ?", id, number) 
-    if result.length < 0
-        return vote = result[0]["votes"].to_i
+    voted = db.execute("SELECT vote.Number, vote.Id, vote.Votes FROM vote WHERE Id = ? AND Number = ?", id, number) 
+    if voted.length == 0
+        return true
     else
-        return false
+        return value = voted[0]["votes"].to_i
     end
 end
+
+def one_post(postid)
+    db = SQLite3::Database.new("db/dbsave.db")
+    db.results_as_hash = true
+    return db.execute("select users.Username, post.Title, post.Postid, post.Number, post.Text from users INNER JOIN post on users.Id = post.Postid WHERE post.Number = ?", postid)
+end 

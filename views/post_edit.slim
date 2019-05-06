@@ -1,5 +1,6 @@
-form action="/post/#{params["number"]}/edit" method="post"
+form action="/post/#{users[0]["Number"]}/edit" method="post"
     input type="text" name="text" placeholder="text" value = "#{users[0]["Text"]}"
+    input type="text" name="title" placeholder="title" value = "#{users[0]["Title"]}"
         button type="submit"  uptate  
-form action="/post/#{params["number"]}/delete" method="post"  
+form action="/post/#{users[0]["Number"]}/delete" method="post"  
         button type="submit" delate
