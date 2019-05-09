@@ -3,13 +3,20 @@ require 'sqlite3'
 require 'slim'
 require 'byebug'
 require 'bcrypt'
-require_relative 'funktions.rb'
+require_relative 'model.rb'
 enable:sessions
+include MyModule
 
+# Display Landing Page
+#
 get('/') do
     slim(:index)
 end 
 
+# Displays a create post page
+#
+# @param [Integer] :id, the ID of the article
+# @see Model#get_article
 get('/post/new') do
     if session[:loggedin] == true
         slim(:post_new)
@@ -18,10 +25,17 @@ get('/post/new') do
     end 
 end
 
+# display when a user is not logged in
+#
 get('/not_loggin') do 
     slim(:not_loggin)
 end 
 
+# Displays a single profile welcomepage
+#
+# @session [Integer] :id, the ID of the article
+#
+# @see Model#profile
 get('/login/:id') do
     if session[:loggedin] == true
         id = session[0][:Id]
@@ -32,6 +46,8 @@ get('/login/:id') do
     end 
 end 
 
+# Display a edit from for a profile
+#
 get('/profile/:id/edit') do
     if session[:loggedin] = true
         result = profile()
@@ -40,6 +56,7 @@ get('/profile/:id/edit') do
         redirect('/')
     end
 end
+
 
 post('/profile/:id/uptate') do
     uptate_profile(params["Username"],params["Mail"])
@@ -56,27 +73,44 @@ get('post/:number') do
     slim(:text, locals:{posts: result})
 end
 
+# Updates an existing post and redirects to '/post/number'
+#
+# @param [Integer] number, The ID of the post
+# @param [String] title, The new title of the post
+# @param [String] text, The new content of the post
+#
+# @see Model#update_post
 post('/post/:number/edit') do
     uptate_post(params["title"],params["text"],params["number"])
     redirect("/post/#{params["number"]}")
 end 
 
+# Display a edit from for a post
+#
+# @params [Interger] number, The ID of the post
+#
+# @see model#edit_post
 get('/post/:number/edit') do
     result = edit_post(params["number"])
     slim(:post_edit, locals:{users: result})
 end
 
+# display a post from a signgle profile
+#
+# @params [interger] postid, The ID of the poster
+#
+# @see model#one_post
 get('/post/:postid') do
     if session[:loggedin] == true 
         result = one_post(params["postid"])
-        p result
-        p one_post(params["postid"])
         slim(:post_one, locals:{posts: result})
     else 
         redirect('/')
     end 
 end
 
+# Displays a login form
+#
 get('/profile/login') do 
     if session[:loggedin] == true 
         redirect("/profile/#{session[:Id]}")
@@ -85,6 +119,13 @@ get('/profile/login') do
     end 
 end 
 
+# Attempts login and updates the session
+#
+# @param [String] username, The username
+# @param [String] password, The password
+#
+# @see Model#login
+# @see model#get_user_id
 post('/profile/login') do 
     if login(params["username"], params["password"]) == true
         session[:Id] = get_user_id(params["username"])
@@ -95,14 +136,25 @@ post('/profile/login') do
     end    
 end
 
+# Displays an error message
+#
 get('/no_access') do 
     slim(:no_access)
 end 
 
+# Displays a register form to profiles
+#
 get('/profile/new') do
     slim(:create_user)
 end
 
+# Creates a new profile and redirects to '/profile/login'
+#
+# @param [String] password, The password of the user
+# @param [String] password1, The password corection of ucer
+# @param [string] username, the new user username
+#
+# @see Model#create_article
 post('/create') do
     if params["password"] == params["password1"]
         create_user(params["username"], params["password"], params["email"])
@@ -112,10 +164,29 @@ post('/create') do
     end
 end
 
+# Creates a new post and redirects to '/post/all'
+#
+# @param [String] title, The title of the article
+# @param [String] text, The content of the article
+#
+# @see Model#new_post
 post('/post/new') do
     new_post(params["title"],params["text"])
     redirect('/post/all')
 end
+
+# Deletes an existing post and redirects to '/post/all'
+#
+# @param [Integer] :id, The ID of the article
+# @param [String] title, The new title of the article
+# @param [String] content, The new content of the article
+#
+# @see Model#delete_article
+
+
+
+
+
 
 post('/post/:number/delete') do
     delete_post(params["number"])

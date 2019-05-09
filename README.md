@@ -6,8 +6,8 @@
 En forumsida som har olika sidor som man kan diskutera i.
 
 ## 2. Vyer (sidor)
-En hemsida med länkar till inlägg, en inloggningsida, en felinloggning sida, en måste loggain sida,
-flera sidor där man kan diskutera(kommer upp när man vill skapa en ny disskution), en sök funtion
+En hemsida med lÃ¤nkar till inlÃ¤gg, en inloggningsida, en felinloggning sida, en mÃ…ste loggain sida,
+flera sidor dÃ¤r man kan diskutera(kommer upp nÃ¤r man vill skapa en ny disskution), en sÃ¶k funtion
 
 ## 3. Funktionalitet (med sekvensdiagram)
 
