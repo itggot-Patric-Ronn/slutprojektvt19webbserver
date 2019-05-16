@@ -1,19 +1,29 @@
 module MyModule
+
+    # trys to log in into a profile
+    #
+    # @param [Hash] params form data
+    # @option params [String] username Username of the user
+    # @option params [string] password Password of the user
+    #
+    # @return [Array] containing the data of all the userinfo
+    # @return [false] wrong username or password
     def login(username, password)  
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
         result = db.execute("SELECT Password From users Where Username = (?)", username)
         if BCrypt::Password.new(result[0][0]).==(password)
-            session[:username] = username
-            session[:cookies] = request.cookies
-            session[:loggedin] = true
             return true 
         else 
-            session[:loggedin] = false
             return false
         end 
     end 
 
+    # gets all post
+    #
+    # @param [Hash] params form data
+    #
+    # @return [Array] containing the data of all the post
     def all_post()
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
@@ -21,42 +31,85 @@ module MyModule
         return result
     end 
 
+    # get one post
+    #
+    # @param [Hash] params form data
+    # @option params [String] number The id of the post
+    #
+    # @return [Array] containing the data of all the post
     def text(number)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
         result = db.execute("select users.Username, post.Title, post.Postid, post.Number, post.text from post WHERE post.number = ?", number)
     end 
 
+    # get a user id
+    #
+    # @param [Hash] params form data
+    # @option params [String] username Username of the user
+    #
+    # @return [Array] containing the data of all the user id 
     def get_user_id(username)
         db = SQLite3::Database.new("db/dbsave.db")
         result = db.execute("SELECT Id FROM users WHERE Username = ?", username)
         return result[0][0]
     end
 
+    # crates a user 
+    #
+    # @param [Hash] params form data
+    # @option params [String] username Username of the user
+    # @option params [string] password Password of the user
+    # @option params [string] email Email of the user
     def create_user(username,password,email)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
         db.execute("INSERT INTO users (Username, Password, Mail) VALUES (?,?,?)", username, BCrypt::Password.create(password), email)
     end
 
-    def profile()
+    # get the information from the id 
+    #
+    # @param [Hash] params form data
+    # @option params [String] id The id of the profile
+    #
+    # @return [Array] containing the data of all the profiel info
+    def profile(id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
-        result = db.execute("SELECT Password, Id, Mail, Username From users Where Id = (?)", session[:Id])
+        result = db.execute("SELECT Password, Id, Mail, Username From users Where Id = (?)", id)
         return result
     end 
 
-    def uptate_profile(username,mail)
+    # uptates a profile 
+    #
+    # @param [Hash] params form data
+    # @option params [String] username Username of the user
+    # @option params [string] password Password of the user
+    # @option params [string] email Email of the user
+    def uptate_profile(username,mail,id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
-        db.execute("UPDATE users SET Username = ?, Mail = ? WHERE Id = ?", username, mail, session[:Id])
+        db.execute("UPDATE users SET Username = ?, Mail = ? WHERE Id = ?", username, mail, id)
     end 
-
+    # uptates a post 
+    #
+    # @param [Hash] params form data
+    # @option params [String] title  The title if the post
+    # @option params [string] text The text of teh post
+    # @option params [string] number The id of the post
     def uptate_post(title,text,number)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
         db.execute("UPDATE post SET Title = ?, Text = ? WHERE Number = ?", "#{title}", "#{text}", number)
     end 
+    # trys to log in into a profile
+    #
+    # @param [Hash] params form data
+    # @option params [String] username Username of the user
+    # @option params [string] password Password of the user
+    #
+    # @return [Array] containing the data of all the userinfo
+    # @return [false] wrong username or password
 
     def edit_post(number)
         db = SQLite3::Database.new("db/dbsave.db")
@@ -64,10 +117,10 @@ module MyModule
         db.execute("SELECT Text, Number, Title From post Where Number = (?)", number)
     end 
 
-    def new_post(title,text)
+    def new_post(title,text,id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
-        db.execute("INSERT INTO post (Title, Text, Postid, Upvote) VALUES (?,?,?,?)", title, text, session[:Id], 0)
+        db.execute("INSERT INTO post (Title, Text, Postid, Upvote) VALUES (?,?,?,?)", title, text, id, 0)
     end
 
     def delete_post(number)

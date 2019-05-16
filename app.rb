@@ -16,6 +16,7 @@ end
 # Displays a create post page
 #
 # @param [Integer] :id, the ID of the article
+#
 # @see Model#get_article
 get('/post/new') do
     if session[:loggedin] == true
@@ -33,13 +34,13 @@ end
 
 # Displays a single profile welcomepage
 #
-# @session [Integer] :id, the ID of the article
+# @param [Integer] :id, the ID of the article
 #
 # @see Model#profile
 get('/login/:id') do
     if session[:loggedin] == true
         id = session[0][:Id]
-        result = profile()
+        result = profile(params["id"])
         slim(:loginid, locals:{users:result})
     else 
         redirect('/not_loggin')
@@ -50,24 +51,37 @@ end
 #
 get('/profile/:id/edit') do
     if session[:loggedin] = true
-        result = profile()
+        result = profile(params["id"])
         slim(:profile_edit, locals:{users: result})
     else 
         redirect('/')
     end
 end
 
-
+# Uptates a profile rederects to profile page
+#
+# @param [String] Username, the profile username
+# @param [String] Mail, the rofile mail
+#
+# @see modlel#uptate_profile
 post('/profile/:id/uptate') do
-    uptate_profile(params["Username"],params["Mail"])
+    uptate_profile(params["Username"],params["Mail"],params["id"])
     redirect("/profile/#{session[:Id]}")
 end
 
+# Display all posts
+#
+# @see model#all_post
 get('/post/all') do
     result = all_post()
     slim(:post_all, locals:{posts: result})
 end  
 
+# Display one post
+#
+# @param [Integer] number, The ID of the post
+#
+# @see model#text
 get('post/:number') do
     result = text(post[":number"])
     slim(:text, locals:{posts: result})
@@ -87,7 +101,7 @@ end
 
 # Display a edit from for a post
 #
-# @params [Interger] number, The ID of the post
+# @param [Integer] number, The ID of the post
 #
 # @see model#edit_post
 get('/post/:number/edit') do
@@ -97,7 +111,7 @@ end
 
 # display a post from a signgle profile
 #
-# @params [interger] postid, The ID of the poster
+# @param [Integer] postid, The ID of the poster
 #
 # @see model#one_post
 get('/post/:postid') do
@@ -128,6 +142,9 @@ end
 # @see model#get_user_id
 post('/profile/login') do 
     if login(params["username"], params["password"]) == true
+        session[:username] = params["username"
+        session[:cookies] = request.cookies
+        session[:loggedin] = true
         session[:Id] = get_user_id(params["username"])
         redirect("/profile/#{session[:Id]}")
     else
@@ -171,33 +188,32 @@ end
 #
 # @see Model#new_post
 post('/post/new') do
-    new_post(params["title"],params["text"])
+    new_post(params["title"],params["text"],session[":id"])
     redirect('/post/all')
 end
 
 # Deletes an existing post and redirects to '/post/all'
 #
-# @param [Integer] :id, The ID of the article
-# @param [String] title, The new title of the article
-# @param [String] content, The new content of the article
+# @param [iteger] number, The ID of the article
 #
-# @see Model#delete_article
-
-
-
-
-
-
+# @see model#delete_post
 post('/post/:number/delete') do
     delete_post(params["number"])
     redirect('/post/all')
 end
 
+# Deletes an existing porfile and redirects to '/'
+#
+# @param [iteger] id, The ID of the profile
+#
+# @see model#delete_user
 post('/profile/:id/delete') do
     delete_user(params["id"])
     redirect('/')
 end
 
+# Display a profile page
+#
 get('/profile/:id') do
     if session[:loggedin] == true 
         slim(:profile)
@@ -206,6 +222,12 @@ get('/profile/:id') do
     end 
 end 
 
+# Change a vote at a post up
+#
+# @param [integer] id, The post ID
+#
+# @see model#vote_change1
+# @see model#vote  
 get('/uvote/:id') do
     vote_value = vote(params["id"], session[:Id])
     if vote_value == -1
@@ -216,6 +238,12 @@ get('/uvote/:id') do
     redirect('/post/all')
 end
 
+# Change a vote at a post down
+#
+# @param [integer] id, The post ID
+#
+# @see model#vote_change1
+# @see model#vote
 get('/dvote/:id') do
     vote_value = vote(params["id"], session[:Id])
     if vote_value == 1
@@ -226,6 +254,8 @@ get('/dvote/:id') do
     redirect('/post/all')
 end
 
+# A logout page
+#
 get('/logout') do
     session.clear
     redirect('/')
