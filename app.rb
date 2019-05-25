@@ -50,8 +50,8 @@ end
 # Display a edit from for a profile
 #
 get('/profile/:id/edit') do
-    if session[:loggedin] = true
-        result = profile(params["id"])
+    if session[:loggedin] == true
+        result = profile(session[0][:Id])
         slim(:profile_edit, locals:{users: result})
     else 
         redirect('/')
@@ -65,7 +65,7 @@ end
 #
 # @see modlel#uptate_profile
 post('/profile/:id/uptate') do
-    uptate_profile(params["Username"],params["Mail"],params["id"])
+    uptate_profile(params["Username"],params["Mail"],session[0][:Id])
     redirect("/profile/#{session[:Id]}")
 end
 
@@ -105,8 +105,13 @@ end
 #
 # @see model#edit_post
 get('/post/:number/edit') do
+
     result = edit_post(params["number"])
-    slim(:post_edit, locals:{users: result})
+    if result[0]['Postid'] == session[0][:Id]
+        slim(:post_edit, locals:{users: result})
+    else 
+        redirect('/not_loggin')
+    end 
 end
 
 # display a post from a signgle profile
@@ -198,8 +203,12 @@ end
 #
 # @see model#delete_post
 post('/post/:number/delete') do
-    delete_post(params["number"])
-    redirect('/post/all')
+    if postid(params["number"]) == session[:Id]
+        delete_post(params["number"])
+        redirect('/post/all')
+    else 
+        redirect('/no_access')
+    end  
 end
 
 # Deletes an existing porfile and redirects to '/'
@@ -208,8 +217,12 @@ end
 #
 # @see model#delete_user
 post('/profile/:id/delete') do
-    delete_user(params["id"])
-    redirect('/')
+    if params["id"] == session[0][:Id]
+        delete_user(params["id"])
+        redirect('/')
+    else 
+        redirect('/not_loggin')
+    end
 end
 
 # Display a profile page

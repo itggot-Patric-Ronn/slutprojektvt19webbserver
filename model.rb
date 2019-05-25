@@ -72,7 +72,7 @@ module MyModule
     # @param [Hash] params form data
     # @option params [String] id The id of the profile
     #
-    # @return [Array] containing the data of all the profiel info
+    # @return [Array] containing the data of all the profile info
     def profile(id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
@@ -91,53 +91,65 @@ module MyModule
         db.results_as_hash = true
         db.execute("UPDATE users SET Username = ?, Mail = ? WHERE Id = ?", username, mail, id)
     end 
+
     # uptates a post 
     #
     # @param [Hash] params form data
     # @option params [String] title  The title if the post
     # @option params [string] text The text of teh post
-    # @option params [string] number The id of the post
+    # @option params [Integer] number The id of the post
     def uptate_post(title,text,number)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
         db.execute("UPDATE post SET Title = ?, Text = ? WHERE Number = ?", "#{title}", "#{text}", number)
     end 
-    # trys to log in into a profile
+
+    # GET info from one post
     #
     # @param [Hash] params form data
-    # @option params [String] username Username of the user
-    # @option params [string] password Password of the user
+    # @option params [Integer] number the id of the post 
     #
-    # @return [Array] containing the data of all the userinfo
-    # @return [false] wrong username or password
-
+    # @return [Array] containing the data of all the postinfo
     def edit_post(number)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
-        db.execute("SELECT Text, Number, Title From post Where Number = (?)", number)
+        db.execute("SELECT Text, Number, Title, Postid From post Where Number = (?)", number)
     end 
 
+    # crates a user 
+    #
+    # @param [Hash] params form data
+    # @option params [String] titel The title of the post
+    # @option params [string] text The text of the post
+    # @option params [Integer] id the id of the profile
     def new_post(title,text,id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
         db.execute("INSERT INTO post (Title, Text, Postid, Upvote) VALUES (?,?,?,?)", title, text, id, 0)
     end
-
+    # Deletes a post
+    #
+    # @option params [Integer] number The id of the post
     def delete_post(number)
         db = SQLite3::Database.new("db/dbsave.db")
         db.execute("DELETE FROM post WHERE Number = ?", number)
     end
 
+    # Deletes a user
+    #
+    # @option params [Integer] id the The id of the profile
     def delete_user(id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.execute("DELETE FROM user WHERE Id = ?", id)
     end 
 
-    def postsid()
-        db = SQLite3::Database.new("db/dbsave.db")
-        db.results_as_hash = true
-    end 
-
+    # chgages the vote score at a post
+    #
+    # @param [Hash] params form data
+    # @option params [Integer] votes The vote status of the user
+    # @option params [Integer] upvotes the total of the votes
+    # @option params [Integer] number the The id of the post
+    # @option params [Integer] id the id of the profile
     def vote_change1(number, id, votes, upvotes)
         db = SQLite3::Database.new("db/dbsave.db")
         if vote(number, id) == true
@@ -149,6 +161,11 @@ module MyModule
         db.execute("UPDATE post SET upvote = ? WHERE Number = ?", upvote + upvotes, number)
     end
 
+    # if the user has voted before
+    #
+    # @param [Hash] params form data
+    # @option params [Integer] number the The id of the post
+    # @option params [Integer] id the id of the profile
     def vote(number, id)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
@@ -160,9 +177,28 @@ module MyModule
         end
     end
 
-    def one_post(postid)
+    # GET info from one post
+    #
+    # @param [Hash] params form data
+    # @option params [Integer] number the id of the post 
+    #
+    # @return [Array] containing the data of all the postinfo
+    def one_post(number)
         db = SQLite3::Database.new("db/dbsave.db")
         db.results_as_hash = true
-        return db.execute("select users.Username, post.Title, post.Postid, post.Number, post.Text from users INNER JOIN post on users.Id = post.Postid WHERE post.Number = ?", postid)
+        return db.execute("select users.Username, post.Title, post.Postid, post.Number, post.Text from users INNER JOIN post on users.Id = post.Postid WHERE post.Number = ?", number)
+    end 
+
+    # get the post id
+    #
+    # @param [Hash] params form data
+    # @option params [Integer] number the id of the post 
+    #
+    # @return [Array] containing the data of the post id
+    def postid(number)
+        db = SQLite3::Database.new("db/dbsave.db")
+        db.results_as_hash = true
+        return db.execute("select post.Postid FROM post WHERE post.Number = ?", number)
     end 
 end 
+        
