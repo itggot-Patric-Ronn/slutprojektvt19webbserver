@@ -19,7 +19,7 @@ end
 #
 # @see Model#get_article
 get('/post/new') do
-    if session[:loggedin] == true
+    if session[:loggedin] == true 
         slim(:post_new)
     else
         redirect('/not_loggin')
@@ -65,8 +65,9 @@ end
 #
 # @see modlel#uptate_profile
 post('/profile/:id/uptate') do
-    uptate_profile(params["Username"],params["Mail"],session[0][:Id])
-    redirect("/profile/#{session[:Id]}")
+        uptate_profile(params["Username"],params["Mail"],session[0][:Id])
+        redirect("/profile/#{session[:Id]}")
+    end 
 end
 
 # Display all posts
@@ -95,8 +96,12 @@ end
 #
 # @see Model#update_post
 post('/post/:number/edit') do
-    uptate_post(params["title"],params["text"],params["number"])
-    redirect("/post/#{params["number"]}")
+    if params["title"].length > 0 && params["content"].length > 0
+        uptate_post(params["title"],params["text"],params["number"])
+        redirect("/post/#{params["number"]}")
+    else 
+        redirect('/post/new')
+    end 
 end 
 
 # Display a edit from for a post
@@ -178,7 +183,7 @@ end
 #
 # @see Model#create_article
 post('/create') do
-    if params["password"] == params["password1"]
+    if params["password"] == params["password1"] && params["password"].length > 0 && params["username"].length > 0
         create_user(params["username"], params["password"], params["email"])
         redirect('/profile/login')
     else
@@ -193,8 +198,12 @@ end
 #
 # @see Model#new_post
 post('/post/new') do
-    new_post(params["title"],params["text"],session[":id"])
-    redirect('/post/all')
+    if params["title"].length > 0 && params["content"].length > 0
+        new_post(params["title"],params["text"],session[":id"])
+        redirect('/post/all')
+    else 
+        redirect('/post/new')
+    end 
 end
 
 # Deletes an existing post and redirects to '/post/all'
